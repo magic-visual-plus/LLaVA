@@ -10,7 +10,7 @@ MODEL_VERSION=llama-2-7b-chat
 PROMPT_VERSION=plain
 ########### DO NOT CHANGE ###########
 
-deepspeed llava/train/train_mem.py \
+python -m debugpy --listen 0.0.0.0:5678 --wait-for-client /root/anaconda3/envs/lisa/bin/deepspeed llava/train/train_mem.py \
     --deepspeed ./scripts/zero2.json \
     --model_name_or_path /opt/product/llama/llama-2-7b-chat-hf \
     --version $PROMPT_VERSION \

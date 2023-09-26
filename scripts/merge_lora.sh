@@ -1,0 +1,1 @@
+python merge_lora_weights.py --model-path /opt/product/LLaVA/checkpoints/llava-llama-2-7b-chat-lightning-lora-preview --model-base /opt/product/llama/llama-2-7b-chat-hf --save-model-path ./checkpoints/llava-7b-llama-2-7b-chat

@@ -1,3 +1,7 @@
+import pytest
+from loguru import logger
+from addict import Dict
+
 import argparse
 import torch
 
@@ -13,8 +17,6 @@ import requests
 from PIL import Image
 from io import BytesIO
 from transformers import TextStreamer
-from loguru import logger
-
 
 def load_image(image_file):
     if image_file.startswith('http') or image_file.startswith('https'):
@@ -25,49 +27,46 @@ def load_image(image_file):
     return image
 
 
-def main(args):
+def test_chat():
+    args = Dict(
+        {
+            "model_path": "/opt/product/LLaVA/checkpoints/llava-7b-llama-2-7b-chat",
+            "model_base": None,
+            "image_file": "/opt/product/LLaVA/img12.jpg",
+            "num_gpus": 1,
+            "conv_mode": None,
+            "temperature": 0.2,
+            "max_new_tokens": 512,
+            "load_8bit": True,
+            "load_4bit": False,
+            "debug": False,
+        }
+    )
     # Model
     disable_torch_init()
 
     model_name = get_model_name_from_path(args.model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(args.model_path, args.model_base, model_name, args.load_8bit, args.load_4bit)
-
-    if 'llama-2' in model_name.lower():
-        conv_mode = "llava_llama_2"
-    elif "v1" in model_name.lower():
-        conv_mode = "llava_v1"
-    elif "mpt" in model_name.lower():
-        conv_mode = "mpt"
-    else:
-        conv_mode = "llava_v0"
-
-    logger.info("conv mode {}", conv_mode)
-    # conv_mode = "llava_v1"
-    if args.conv_mode is not None and conv_mode != args.conv_mode:
-        print('[WARNING] the auto inferred conversation mode is {}, while `--conv-mode` is {}, using {}'.format(conv_mode, args.conv_mode, args.conv_mode))
-    else:
-        args.conv_mode = conv_mode
-
+    logger.info("context len {}", context_len)
+    args.conv_mode = "llava_llama_2"
     conv = conv_templates[args.conv_mode].copy()
-    if "mpt" in model_name.lower():
-        roles = ('user', 'assistant')
-    else:
-        roles = conv.roles
-
+    logger.info("conv {}, roles {}", conv, conv.roles)
+    roles = conv.roles
     image = load_image(args.image_file)
     image_tensor = image_processor.preprocess(image, return_tensors='pt')['pixel_values'].half().cuda()
-
+    
+    logger.info("image_tensor shape {}", image_tensor.shape)
+    
     while True:
-        try:
-            inp = input(f"{roles[0]}: ")
-        except EOFError:
-            inp = ""
-        if not inp:
-            print("exit...")
-            break
-
+        # try:
+        #     inp = input(f"{roles[0]}: ")
+        # except EOFError:
+        #     inp = ""
+        # if not inp:
+        #     print("exit...")
+        #     break
+        inp = "hello"
         print(f"{roles[1]}: ", end="")
-        print(f'input {inp}')
 
         if image is not None:
             # first message
@@ -106,20 +105,10 @@ def main(args):
 
         if args.debug:
             print("\n", {"prompt": prompt, "outputs": outputs}, "\n")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, default="facebook/opt-350m")
-    parser.add_argument("--model-base", type=str, default=None)
-    parser.add_argument("--image-file", type=str, required=True)
-    parser.add_argument("--num-gpus", type=int, default=1)
-    parser.add_argument("--conv-mode", type=str, default=None)
-    parser.add_argument("--temperature", type=float, default=0.2)
-    parser.add_argument("--max-new-tokens", type=int, default=512)
-    parser.add_argument("--load-8bit", action="store_true")
-    parser.add_argument("--load-4bit", action="store_true")
-    parser.add_argument("--debug", action="store_true")
-    args = parser.parse_args()
-    print(f'args {args}')
-    main(args)
+    
+    
+    
+if __name__ == '__main__':
+    test_chat()
+    
+    

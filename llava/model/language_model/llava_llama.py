@@ -25,7 +25,7 @@ from transformers import AutoConfig, AutoModelForCausalLM, \
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
 from ..llava_arch import LlavaMetaModel, LlavaMetaForCausalLM
-
+from loguru import logger
 
 class LlavaConfig(LlamaConfig):
     model_type = "llava"
@@ -45,6 +45,8 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         super(LlamaForCausalLM, self).__init__(config)
         self.model = LlavaLlamaModel(config)
 
+        # 7B hidden_size is 4096 , vocab_size is 32000
+        logger.info("llava config {}", config)
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
         # Initialize weights and apply final processing

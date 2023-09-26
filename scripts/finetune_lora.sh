@@ -8,8 +8,8 @@
 ################## VICUNA ##################
 
 ################## LLaMA-2 ##################
-# PROMPT_VERSION="llava_llama_2"
-# MODEL_VERSION="llama-2-7b-chat"
+PROMPT_VERSION="llava_llama_2"
+MODEL_VERSION="llama-2-7b-chat"
 ################## LLaMA-2 ##################
 
 deepspeed llava/train/train_mem.py \
